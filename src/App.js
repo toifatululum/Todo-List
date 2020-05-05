@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Router, Route} from 'react-router-dom';
+import {BrowserRouter as Router, Route} from 'react-router-dom';
 import Todos from './components/Todos'
 import Header from './components/layout/Header'
 import AddTodo from './components/Addtodo'
@@ -15,8 +15,8 @@ class App extends Component {
   }
   componentDidMount() {
     axios
-      .get('https://jsonplaceholder.typicode.com/todos?_limit=10')
-      .then(res => this.setState({ todos: res.data }));
+      .get('https://todos-ulum.herokuapp.com/api/todos/list?limit=10')
+      .then(res => this.setState({ todos: res.data.data.todos }));
   }
   //Toggle completed
   markComplete = (id) => {
@@ -32,9 +32,9 @@ class App extends Component {
 
   //Delete todo
   delTodo = id => {
-    axios.delete(`https://jsonplaceholder.typicode.com/todos/${id}`).then(res =>
+    axios.get(`https://todos-ulum.herokuapp.com/api/todos/delete/${id}`).then(res =>
       this.setState({
-        todos: [...this.state.todos.filter(todo => todo.id !== id)]
+        todos: [...this.state.todos.filter(todo => todo._id !== id)]
       })
     );
   };
@@ -42,13 +42,12 @@ class App extends Component {
   // Add Todo
   addTodo = title => {
     axios
-      .post('https://jsonplaceholder.typicode.com/todos', {
+      .post('https://todos-ulum.herokuapp.com/api/todos/create', {
         title,
         completed: false
       })
       .then(res => {
-        res.data.id = uuidv1();
-        this.setState({ todos: [...this.state.todos, res.data] });
+        this.setState({ todos: [...this.state.todos, res.data.data.todos[0]] });
       });
   };
   render(){
@@ -58,7 +57,7 @@ class App extends Component {
       <div className="App">
     <div className="container">
     <Header />
-    <Router exact path="/" render={props => (
+    <Route exact path="/" render={props => (
       <React.Fragment>
          <AddTodo addTodo={this.addTodo}/>
          <Todos
